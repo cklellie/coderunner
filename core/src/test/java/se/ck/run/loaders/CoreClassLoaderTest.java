@@ -19,8 +19,7 @@ public class CoreClassLoaderTest {
 	CoreClassLoader instance, instance1, instance2 = null;
 	
 	Library library = null;
-	URL one = null;
-	URL two = null;
+	
 	String oneDir = "src/test/data/one/";
 	String twoDir = "src/test/data/two/";
 	String oneFile = "onecontents.properties";
@@ -31,9 +30,7 @@ public class CoreClassLoaderTest {
 	@Before
 	public void setup() throws MalformedURLException
 	{
-		library = new Library();
-		one = genURL( oneDir );
-		two = genURL( twoDir );
+		library = new Library();	
 	}
 	
 	@After
@@ -43,46 +40,38 @@ public class CoreClassLoaderTest {
 		if( instance1 != null ){instance1.close();}
 		if( instance2 != null ){instance2.close();}
 		instance = instance1 = instance2 = null;
-		library = null;
-		one = two = null;		
-	}
-	
-	private URL genURL( String dir ) throws MalformedURLException
-	{
-		File oneDir = new File( dir );
-		assertThat( oneDir.exists(), is( equalTo( true ) ) );
-		return oneDir.toURI().toURL();		
-	}	
+		library = null;		
+	}			
 	
 	@Test
-	public void one()
+	public void one() throws MalformedURLException
 	{		
-		library.add( one );		
+		library.add( oneDir );		
 		instance = new CoreClassLoader( library );
-		assertResource( oneFile, true );
-		assertResource( twoFile, false );
-		assertResource( commonFile, true );
+		assertResource( instance, oneFile, true );
+		assertResource( instance, twoFile, false );
+		assertResource( instance, commonFile, true );
 	}
 	
 	@Test
-	public void two()
+	public void two() throws MalformedURLException
 	{		
-		library.add( two );		
+		library.add( twoDir );		
 		instance = new CoreClassLoader( library );
-		assertResource( oneFile, false );
-		assertResource( twoFile, true );
-		assertResource( commonFile, true );
+		assertResource( instance, oneFile, false );
+		assertResource( instance, twoFile, true );
+		assertResource( instance, commonFile, true );
 	}
 	
 	@Test
 	public void readProperties() throws IOException
 	{
 		Library library1 = new Library();
-		library1.add( one );
+		library1.add( oneDir );
 		instance1 = new CoreClassLoader( library1 );
 		
 		Library library2 = new Library();
-		library2.add( two );
+		library2.add( twoDir );
 		instance2 = new CoreClassLoader( library2 );
 		
 		Properties p1 = new Properties();
@@ -95,7 +84,36 @@ public class CoreClassLoaderTest {
 		assertThat( p2.getProperty( "value" ), is( equalTo( "two" ) ) );
 	}
 	
-	private void assertResource( String res, boolean exists )
+	@Test
+	public void chained( ) throws IOException
+	{
+		library.add( oneDir );
+		instance = new CoreClassLoader( library );
+		
+		Library library2 = new Library();
+		library2.add( twoDir );
+		instance1 = new CoreClassLoader(library2, instance );
+		
+		assertResource( instance, oneFile, true );
+		assertResource( instance, twoFile, false );
+		assertResource( instance, commonFile, true );
+		
+		assertResource( instance1, oneFile, true );
+		assertResource( instance1, twoFile, true );
+		assertResource( instance1, commonFile, true );
+		
+		Properties p1 = new Properties();
+		p1.load( instance.getResourceAsStream( commonFile ) );
+		
+		Properties p2 = new Properties();
+		p2.load( instance1.getResourceAsStream( commonFile ) );
+		
+		assertThat( p1.getProperty( "value" ), is( equalTo( "one" ) ) );
+		assertThat( p2.getProperty( "value" ), is( equalTo( "one" ) ) );
+		
+	}
+	
+	private void assertResource( CoreClassLoader instance, String res, boolean exists )
 	{
 		URL actual = instance.getResource( res );
 		assertThat( actual != null, is( equalTo( exists ) ) );

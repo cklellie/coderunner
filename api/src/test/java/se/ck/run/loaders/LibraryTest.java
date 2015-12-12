@@ -1,12 +1,13 @@
 package se.ck.run.loaders;
 
+import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.nullValue;
-import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertThat;
 
+import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -62,6 +63,56 @@ public class LibraryTest {
 		URL[] actualArray = instance.getUrlsAsArray();
 		assertThat( actualArray.length, is( equalTo( 1 ) ) );
 		assertThat( actualArray[0], is( equalTo( expected ) ) );
+	}
+	
+	@Test
+	public void size() throws MalformedURLException
+	{
+		for( int i=0; i<10; i++ )
+		{
+			assertThat( instance.size(), is( equalTo( i ) ) );
+			instance.add( new URL( "file:///." ) );
+		}
+		assertThat( instance.size(), is( equalTo( 10 ) ) );		
+	}
+	
+	@Test
+	public void clear() throws MalformedURLException
+	{
+		for( int i=0; i<10; i++ )
+		{			
+			instance.add( new URL( "file:///." ) );
+		}
+		assertThat( instance.size(), is( equalTo( 10 ) ) );
+		instance.clear();
+		assertThat( instance.size(), is( equalTo( 0 ) ) );
+	}
+	
+	@Test
+	public void addFile( ) throws MalformedURLException
+	{
+		File f = new File( "src" );
+		URL expected = f.toURI().toURL();
+		instance.add( f );
+		
+		List<URL> actual = instance.getUrls();
+		assertThat( actual, is( not( nullValue() ) ) );
+		assertThat( actual.size(), is( equalTo( 1 ) ) );
+		assertThat( actual, contains( expected ) );		
+	}
+	
+	@Test
+	public void addPath( ) throws MalformedURLException
+	{
+		String item = "src";
+		File f = new File( item );
+		URL expected = f.toURI().toURL();
+		instance.add( item );
+		
+		List<URL> actual = instance.getUrls();
+		assertThat( actual, is( not( nullValue() ) ) );
+		assertThat( actual.size(), is( equalTo( 1 ) ) );
+		assertThat( actual, contains( expected ) );
 	}
 
 }

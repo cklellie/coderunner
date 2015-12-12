@@ -5,6 +5,12 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLStreamHandler;
 
+/**
+ * Handler for URL Streams.
+ * 
+ * @author cklellie
+ *
+ */
 public class CoreUrlStreamHandler extends URLStreamHandler
 {
 	@Override
