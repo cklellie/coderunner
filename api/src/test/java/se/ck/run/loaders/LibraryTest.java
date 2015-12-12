@@ -57,7 +57,11 @@ public class LibraryTest {
 		instance.add( expected );
 		List<URL> actual = instance.getUrls();
 		assertThat( actual.size(), is( equalTo( 1 ) ) );
-		assertThat( actual, contains( expected ) );				
+		assertThat( actual, contains( expected ) );		
+		
+		URL[] actualArray = instance.getUrlsAsArray();
+		assertThat( actualArray.length, is( equalTo( 1 ) ) );
+		assertThat( actualArray[0], is( equalTo( expected ) ) );
 	}
 
 }
