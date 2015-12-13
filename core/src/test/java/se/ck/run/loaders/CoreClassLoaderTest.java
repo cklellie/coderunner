@@ -5,7 +5,9 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Properties;
@@ -26,6 +28,8 @@ public class CoreClassLoaderTest {
 	String twoFile = "twocontents.properties";
 	String commonFile = "contents.properties";
 	
+	String guavaJar = "http://repo1.maven.org/maven2/com/google/guava/guava/19.0/guava-19.0.jar";	
+	String guavaRes = "com/google/common/primitives/Booleans.class";
 	
 	@Before
 	public void setup() throws MalformedURLException
@@ -117,6 +121,68 @@ public class CoreClassLoaderTest {
 	{
 		URL actual = instance.getResource( res );
 		assertThat( actual != null, is( equalTo( exists ) ) );
+	}
+	
+	@Test
+	public void httpJar( ) throws MalformedURLException
+	{
+		library.add( guavaJar );
+		instance = new CoreClassLoader(library);
+		
+		assertResource( instance, guavaRes, true );		
+	}
+	
+	@Test
+	public void localJar( ) throws IOException
+	{
+		String path = retrieveResourceLocally( guavaJar );
+		library.add( path );
+		instance = new CoreClassLoader( library );
+		
+		assertResource( instance, guavaRes, true );	
+	}
+	
+	private String retrieveResourceLocally( String remotePath ) throws IOException
+	{
+		URL url = new URL( remotePath );
+		
+		InputStream is = null;
+		FileOutputStream os = null;
+		File localCache = null;
+		try
+		{
+			is = url.openConnection().getInputStream();
+			url.openConnection().getInputStream();		
+			localCache = File.createTempFile( "locallyCached", ".jar" );			
+		
+			os = new FileOutputStream( localCache );
+						
+			byte[] buffer = new byte[1024];
+			
+			int read =0;
+			while( ( read = is.read(buffer ) ) != -1  )
+			{	
+				os.write(buffer, 0, read );								
+			}		
+		}
+		finally
+		{
+			if( localCache != null )
+			{
+				localCache.deleteOnExit();
+			}
+			if( is != null )
+			{
+				is.close();
+			}
+			if( os != null )
+			{
+				os.flush();
+				os.close();
+			}			
+		}
+		
+		return localCache.getAbsolutePath();
 	}
 
 }

@@ -78,7 +78,12 @@ public class Library
 	 * @throws MalformedURLException
 	 */
 	public void add( String item ) throws MalformedURLException 
-	{
+	{		
+		if( item.toLowerCase().startsWith( "http" ) )
+		{
+			add( new URL( item ) );
+			return;
+		}		
 		add( new File( item ) );
 	}
 	

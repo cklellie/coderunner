@@ -114,5 +114,31 @@ public class LibraryTest {
 		assertThat( actual.size(), is( equalTo( 1 ) ) );
 		assertThat( actual, contains( expected ) );
 	}
+	
+	@Test
+	public void addPathHttp( ) throws MalformedURLException
+	{		
+		String item = "http://localhost/something.jar";
+		URL expected = new URL( item );		
+		instance.add( item );
+		
+		List<URL> actual = instance.getUrls();
+		assertThat( actual, is( not( nullValue() ) ) );
+		assertThat( actual.size(), is( equalTo( 1 ) ) );
+		assertThat( actual, contains( expected ) );
+	}
+	
+	@Test
+	public void addPathHttps( ) throws MalformedURLException
+	{		
+		String item = "https://localhost/something.jar";
+		URL expected = new URL( item );		
+		instance.add( item );
+		
+		List<URL> actual = instance.getUrls();
+		assertThat( actual, is( not( nullValue() ) ) );
+		assertThat( actual.size(), is( equalTo( 1 ) ) );
+		assertThat( actual, contains( expected ) );
+	}
 
 }
