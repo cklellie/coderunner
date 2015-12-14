@@ -1,0 +1,4 @@
+include 'api'
+include 'core'
+
+rootProject.name = 'coderunner'
